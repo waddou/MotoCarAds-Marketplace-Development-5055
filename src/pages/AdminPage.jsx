@@ -66,8 +66,8 @@ const AdminPage = () => {
   const signInAsDemo = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'admin@motocarads.com',
-        password: 'admin123456'
+        email: 'admin@autotrader.com',
+        password: 'admin123'
       })
 
       if (error) {
