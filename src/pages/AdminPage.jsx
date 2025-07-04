@@ -71,22 +71,42 @@ const AdminPage = () => {
       })
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          // Account doesn't exist, create it
-          const { data: signupData, error: signupError } = await supabase.auth.signUp({
-            email: 'admin@motocarads.com',
-            password: 'admin123456',
-            options: {
-              data: {
-                full_name: 'Admin User',
-                username: 'admin'
-              }
-            }
-          })
+  if (error.message.includes('Invalid login credentials')) {
+    // Account doesn't exist, attempt to create it
+    const { data: signupData, error: signupError } = await supabase.auth.signUp({
+      email: 'admin@motocarads.com',
+      password: 'admin123456',
+      options: {
+        data: {
+          full_name: 'Admin User',
+          username: 'admin'
+        }
+      }
+    });
 
-          if (signupError) {
-            throw signupError
-          }
+    if (signupError) {
+      console.error('Signup failed:', signupError.message);
+      // Add more specific error handling here based on signupError.message or signupError.code
+      if (signupError.message.includes('email_address_invalid')) {
+        console.error('Reason: The email address provided is invalid or restricted by Supabase settings.');
+        // Display a user-friendly message about email restrictions
+      } else if (signupError.message.includes('User already registered')) {
+        console.error('Reason: A user with this email address already exists.');
+        // Handle case where user already exists but login failed for other reasons
+      }
+      // ... other signup error types
+    } else if (signupData.user) {
+      console.log('Admin user signed up successfully:', signupData.user);
+      // Handle successful signup (e.g., redirect, show success message)
+    } else {
+      // This case might occur if signup was initiated but requires email confirmation
+      console.log('Signup initiated, confirmation required:', signupData);
+    }
+  } else {
+    console.error('Login failed for an unexpected reason:', error.message);
+    // Handle other types of login errors
+  }
+}
 
           // Wait a moment for the profile to be created by the trigger
           await new Promise(resolve => setTimeout(resolve, 1000))
